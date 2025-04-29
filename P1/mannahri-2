@@ -1,0 +1,7 @@
+FROM frrouting/frr
+
+# Enable routing daemons (BGPD, OSPFD, IS-IS)
+RUN echo "bgpd=yes" >> /etc/frr/daemons && \
+    echo "ospfd=yes" >> /etc/frr/daemons && \
+    echo "isisd=yes" >> /etc/frr/daemons && \
+    echo "zebra=yes" >> /etc/frr/daemons
