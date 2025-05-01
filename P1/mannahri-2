@@ -5,3 +5,9 @@ RUN echo "bgpd=yes" >> /etc/frr/daemons && \
     echo "ospfd=yes" >> /etc/frr/daemons && \
     echo "isisd=yes" >> /etc/frr/daemons && \
     echo "zebra=yes" >> /etc/frr/daemons
+
+COPY frr/zebra.conf /etc/frr/zebra.conf
+COPY frr/ospfd.conf /etc/frr/ospfd.conf
+COPY frr/bgpd.conf /etc/frr/bgpd.conf
+
+RUN chown frr:frr /etc/frr/*
