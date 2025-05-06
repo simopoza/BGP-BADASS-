@@ -1,13 +1,15 @@
-FROM frrouting/frr
+# FROM frrouting/frr
 
-# Enable routing daemons (BGPD, OSPFD, IS-IS)
+# # Enable routing daemons (BGPD, OSPFD, IS-IS)
+# RUN echo "bgpd=yes" >> /etc/frr/daemons && \
+#     echo "ospfd=yes" >> /etc/frr/daemons && \
+#     echo "isisd=yes" >> /etc/frr/daemons && \
+#     echo "zebra=yes" >> /etc/frr/daemons
+
+
+FROM frrouting/frr:latest
+
 RUN echo "bgpd=yes" >> /etc/frr/daemons && \
     echo "ospfd=yes" >> /etc/frr/daemons && \
-    echo "isisd=yes" >> /etc/frr/daemons && \
-    echo "zebra=yes" >> /etc/frr/daemons
-
-COPY frr/zebra.conf /etc/frr/zebra.conf
-COPY frr/ospfd.conf /etc/frr/ospfd.conf
-COPY frr/bgpd.conf /etc/frr/bgpd.conf
-
-RUN chown frr:frr /etc/frr/*
+    echo "zebra=yes" >> /etc/frr/daemons && \
+    echo "evpn=yes" >> /etc/frr/daemons
