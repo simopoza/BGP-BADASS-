@@ -1,34 +1,78 @@
 #!/bin/bash
 
-# Linux networking setup
+# ------------------------
+# Linux Networking Setup
+# ------------------------
+
+# Create a software bridge named br0 (used to bridge interfaces at Layer 2)
 ip link add br0 type bridge
+
+# Bring the bridge interface up
 ip link set dev br0 up
+
+# Create a VXLAN interface named vxlan10 with VNI 10 and default VXLAN UDP port 4789
 ip link add vxlan10 type vxlan id 10 dstport 4789
+
+# Bring the VXLAN interface up
 ip link set dev vxlan10 up
+
+# Add the VXLAN interface to the bridge (enabling Layer 2 connectivity over VXLAN)
 brctl addif br0 vxlan10
+
+# Add the physical interface eth1 to the bridge (connects local network to the VXLAN)
 brctl addif br0 eth1
 
-# FRRouting configuration via vtysh
+# ------------------------
+# FRRouting Configuration
+# ------------------------
+
 vtysh << EOF
 conf t
+
+# Set the router hostname
 hostname mannahri-router-2
+
+# Disable IPv6 forwarding
 no ipv6 forwarding
 
+# Configure interface eth0 with IP and enable OSPF area 0
 interface eth0
  ip address 10.1.1.2/30
+#This allows Router2 to exchange routing information over this interface using OSPF.
  ip ospf area 0
 
+# Configure loopback interface with IP and enable OSPF area 0
 interface lo
  ip address 1.1.1.2/32
  ip ospf area 0
 
+# ------------------------
+# BGP Configuration for EVPN
+# ------------------------
+
 router bgp 1
+
+ # Define BGP neighbor (the Route Reflector at 1.1.1.1)
  neighbor 1.1.1.1 remote-as 1
+
+ # Use loopback interface as source for BGP sessions (more stable than physical interfaces)
  neighbor 1.1.1.1 update-source lo
+
+ # Enter L2VPN EVPN address family configuration
  address-family l2vpn evpn
+
+  # Activate the BGP neighbor for EVPN
   neighbor 1.1.1.1 activate
+
+  # Advertise all VXLAN VNIs in EVPN
   advertise-all-vni
+
  exit-address-family
 
+# ------------------------
+# OSPF Configuration
+# ------------------------
+
 router ospf
+
 EOF

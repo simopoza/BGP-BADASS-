@@ -1,28 +1,52 @@
 #!/bin/bash
 
+# Start VTYSH CLI and enter configuration mode
 vtysh << EOF
 conf t
+
+# Set router hostname
 hostname mannahri-router-1
+
+# Disable IPv6 forwarding
 no ipv6 forwarding
+
+# Configure interface eth0 with IP to connect to Router2
 interface eth0
  ip address 10.1.1.1/30
+
+# Configure interface eth1 with IP to connect to Router3
 interface eth1
  ip address 10.1.1.5/30
+
+# Configure interface eth2 with IP to connect to Router4
 interface eth2
  ip address 10.1.1.9/30
+
+# Configure loopback interface for router ID and BGP source
 interface lo
  ip address 1.1.1.1/32
+
+# Begin BGP configuration for AS 1
 router bgp 1
+
+ # Create a peer-group named 'ibgp' for internal BGP
  neighbor ibgp peer-group
  neighbor ibgp remote-as 1
  neighbor ibgp update-source lo
+
+ # Listen for iBGP peers in range 1.1.1.0/29 and assign them to ibgp group
  bgp listen range 1.1.1.0/29 peer-group ibgp
+
+ # Enter L2VPN EVPN address-family for MAC learning and VXLAN
  address-family l2vpn evpn
   neighbor ibgp activate
   neighbor ibgp route-reflector-client
  exit-address-family
+
+# Enable OSPF and include all interfaces in area 0
 router ospf
  network 0.0.0.0/0 area 0
-line vty
+
+# Save the configuration
 write
 EOF
